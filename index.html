@@ -20,7 +20,7 @@
 <body>
   <header>
     <h1>106 Homework Log</h1>
-    <p>Enter the homework, select a subject and due date, then send. Homework will be shown as "Due" or "Past Due" based on the date.</p>
+    <p>Enter the homework, select a subject and due date, then send. Homework will be shown as "Due" or "Past Due" based on the date. Refresh after keying in.</p>
   </header>
   <div class="container">
     <h2>Post a Notice</h2>
@@ -104,7 +104,6 @@
         return;
       }
 
-      loadMessages();
       await fetch(scriptURL, {
         method: 'POST',
         body: new URLSearchParams({
