@@ -3,17 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="initial-scale=1.0, width=device-width">
-  <title>Board</title>
+  <title>106 Homework</title>
   <link href="style.css" rel="stylesheet">
+  <style>
+    .subject-label {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      margin-right: 8px;
+      color: #fff;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>Digital Notice Board</h1>
-    <p>Type your notice, select a due date, then send. Notices will be shown as "Due" or "Past Due" based on the date.</p>
+    <h1>106 Homework Log</h1>
+    <p>Enter the homework, select a subject and due date, then send. Homework will be shown as "Due" or "Past Due" based on the date.</p>
   </header>
   <div class="container">
     <h2>Post a Notice</h2>
     <input id="msg" type="text" placeholder="Your notice" required style="width: 70%;" />
+    <select id="subject" required>
+      <option value="" disabled selected>Select subject</option>
+      <option value="Math 1">Math 1</option>
+      <option value="EL">EL</option>
+      <option value="DV(D)">DV(D)</option>
+      <option value="DV(E)">DV(E)</option>
+      <option value="Art">Art</option>
+      <option value="HCL">HCL</option>
+      <option value="CL">CL</option>
+      <option value="Malay">Malay</option>
+      <option value="Hindi">Hindi</option>
+      <option value="Physics">Physics</option>
+      <option value="Chemistry">Chemistry</option>
+      <option value="Biology">Biology</option>
+      <option value="Math 2">Math 2</option>
+      <option value="PE">PE</option>
+      <option value="Humanities">Humanities</option>
+      <option value="CS">CS</option>
+      <option value="Math Oly">Math Oly</option>
+      <option value="Math Oly V">Math Oly V</option>
+      <option value="FwFractals">FwFractals</option>
+      <option value="Robotics">Robotics</option>
+      <option value="Third Lang">Third Lang</option>
+    </select>
     <input id="dueDate" type="date" required />
     <button onclick="submitMsg()">Submit</button>
     <h3 class="section-title">Due Notices</h3>
@@ -24,14 +59,44 @@
     <div class="dropdown-content" id="older"></div>
   </div>
 <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyiGZhuA8myAGX4M815cQM_8V0Yfu9od9ZoRgiQ8Smk2BLfDHaHtMd2VHuNRZ4NWFYs/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyst6jClS_BULqyh5gndkPKeZW7gfhZstMbrWKuI4AKWd9dxLlo2V3ztyP3nJErC2HT/exec";
+
+    // Map subject to colors
+    const subjectColors = {
+      "Math 1": "#1f77b4",
+      "EL": "#ff7f0e",
+      "DV(D)": "#2ca02c",
+      "DV(E)": "#d62728",
+      "Art": "#9467bd",
+      "HCL": "#8c564b",
+      "CL": "#e377c2",
+      "Malay": "#bcbd22",
+      "Hindi": "#17becf",
+      "Physics": "#0074D9",
+      "Chemistry": "#FF4136",
+      "Biology": "#2ECC40",
+      "Math 2": "#B10DC9",
+      "PE": "#FF851B",
+      "Humanities": "#7FDBFF",
+      "CS": "#39CCCC",
+      "Math Oly": "#F012BE",
+      "Math Oly V": "#85144b",
+      "FwFractals": "#3D9970",
+      "Robotics": "#111111",
+      "Third Lang": "#AAAAAA"
+    };
 
     async function submitMsg() {
       const msg = document.getElementById('msg').value.trim();
       const dueDate = document.getElementById('dueDate').value;
+      const subject = document.getElementById('subject').value;
 
       if (!msg) {
         alert("Please enter a notice!");
+        return;
+      }
+      if (!subject) {
+        alert("Please select a subject!");
         return;
       }
       if (!dueDate) {
@@ -43,12 +108,14 @@
         method: 'POST',
         body: new URLSearchParams({
           message: msg,
-          dueDate: dueDate
+          dueDate: dueDate,
+          subject: subject
         })
       });
 
       document.getElementById('msg').value = '';
       document.getElementById('dueDate').value = '';
+      document.getElementById('subject').selectedIndex = 0;
       loadMessages();
     }
 
@@ -73,6 +140,16 @@
       return now > due;
     }
 
+    function createSubjectLabel(subject) {
+      if (!subject) return '';
+      const color = subjectColors[subject] || "#888";
+      const div = document.createElement("span");
+      div.className = "subject-label";
+      div.style.backgroundColor = color;
+      div.textContent = subject;
+      return div;
+    }
+
     async function loadMessages() {
       const res = await fetch(scriptURL);
       const messages = await res.json();
@@ -91,15 +168,19 @@
         div.className = 'message';
 
         const dueDate = m.dueDate || m.duedate || '';
+        const subject = m.subject || '';
         const timestamp = m.timestamp ? new Date(m.timestamp).toLocaleString() : '';
         const dueDateDisp = dueDate ? ` (Due: ${dueDate})` : '';
+
+        const subjectLabel = createSubjectLabel(subject);
 
         const msgDiv = document.createElement("strong");
         msgDiv.innerText = m.message;
         const metaDiv = document.createElement("div");
         metaDiv.classList.add("meta");
         metaDiv.textContent = `${timestamp}${dueDateDisp}`;
-        div.append(msgDiv, metaDiv);
+
+        div.append(subjectLabel, msgDiv, metaDiv);
 
         if (isPastDue(dueDate)) {
           pastdueDiv.appendChild(div.cloneNode(true));
@@ -107,7 +188,6 @@
           dueDiv.appendChild(div.cloneNode(true));
         }
 
-        // Place older messages (>1 day old) in dropdown
         if (m.timestamp && isOlderThanOneDay(m.timestamp)) {
           olderDiv.appendChild(div);
         }
