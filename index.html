@@ -6,24 +6,32 @@
   <title>106 Homework</title>
   <link href="style.css" rel="stylesheet">
   <style>
-    .subject-label {
-      display: inline-block;
-      padding: 2px 8px;
+    .message {
       border-radius: 8px;
-      margin-right: 8px;
+      margin-bottom: 10px;
+      padding: 12px;
       color: #fff;
-      font-size: 0.9em;
+      font-size: 1.05em;
+      /* background-color is set in JS based on subject */
+    }
+    .due-date {
       font-weight: bold;
+      margin-right: 12px;
+    }
+    .subject-name {
+      font-style: italic;
+      margin-left: 8px;
+      opacity: 0.9;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>106 Homework Log</h1>
-    <p>Enter the homework, select a subject and due date, then send. Homework will be shown as "Due" or "Past Due" based on the date. Refresh after keying in.</p>
+    <h1>106 Homework Board</h1>
+    <p>Type your notice, select a subject and due date, then send. Notices show as "Due" or "Past Due" based on the date.</p>
   </header>
   <div class="container">
-    <h2>Post a Notice</h2>
+    <h2>Post homework</h2>
     <input id="msg" type="text" placeholder="Your notice" required style="width: 70%;" />
     <select id="subject" required>
       <option value="" disabled selected>Select subject</option>
@@ -51,17 +59,17 @@
     </select>
     <input id="dueDate" type="date" required />
     <button onclick="submitMsg()">Submit</button>
-    <h3 class="section-title">Due Notices</h3>
+    <h3 class="section-title">Due Homework</h3>
     <div id="due"></div>
-    <h3 class="section-title">Past Due Notices</h3>
+    <h3 class="section-title">Past Due Homework</h3>
     <div id="pastdue"></div>
-    <div class="dropdown-btn" onclick="toggleDropdown()">▶ Older Messages</div>
+    <div class="dropdown-btn" onclick="toggleDropdown()">▶ Older Homework</div>
     <div class="dropdown-content" id="older"></div>
   </div>
 <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzQwF7IxZ5wpld4D7b8zaaOGC5BXA4Mrk_rYDAwGkv0OT0iSUtClGi0nuyKYq85H9Bv_Q/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyst6jClS_BULqyh5gndkPKeZW7gfhZstMbrWKuI4AKWd9dxLlo2V3ztyP3nJErC2HT/exec";
 
-    // Map subject to colors
+    // Map subject to background colors
     const subjectColors = {
       "Math 1": "#1f77b4",
       "EL": "#ff7f0e",
@@ -140,14 +148,8 @@
       return now > due;
     }
 
-    function createSubjectLabel(subject) {
-      if (!subject) return '';
-      const color = subjectColors[subject] || "#888";
-      const div = document.createElement("span");
-      div.className = "subject-label";
-      div.style.backgroundColor = color;
-      div.textContent = subject;
-      return div;
+    function getSubjectColor(subject) {
+      return subjectColors[subject] || "#888";
     }
 
     async function loadMessages() {
@@ -164,30 +166,36 @@
 
       messages.reverse().forEach(m => {
         if (!m.message) return;
-        const div = document.createElement('div');
-        div.className = 'message';
-
         const dueDate = m.dueDate || m.duedate || '';
         const subject = m.subject || '';
-        const timestamp = m.timestamp ? new Date(m.timestamp).toLocaleString() : '';
-        const dueDateDisp = dueDate ? ` (Due: ${dueDate})` : '';
+        const assignment = m.message || '';
 
-        const subjectLabel = createSubjectLabel(subject);
+        // Create the notice div
+        const div = document.createElement('div');
+        div.className = 'message';
+        div.style.backgroundColor = getSubjectColor(subject);
 
-        const msgDiv = document.createElement("strong");
-        msgDiv.innerText = m.message;
-        const metaDiv = document.createElement("div");
-        metaDiv.classList.add("meta");
-        metaDiv.textContent = `${timestamp}${dueDateDisp}`;
+        // Show only due date, assignment, and subject
+        const dueDivSpan = document.createElement('span');
+        dueDivSpan.className = "due-date";
+        dueDivSpan.textContent = dueDate;
 
-        div.append(subjectLabel, msgDiv, metaDiv);
+        const assignmentSpan = document.createElement('span');
+        assignmentSpan.textContent = assignment;
 
+        const subjectSpan = document.createElement('span');
+        subjectSpan.className = "subject-name";
+        subjectSpan.textContent = subject;
+
+        // Compose the notice
+        div.append(dueDivSpan, assignmentSpan, subjectSpan);
+
+        // Place in due/past due/older sections
         if (isPastDue(dueDate)) {
           pastdueDiv.appendChild(div.cloneNode(true));
         } else {
           dueDiv.appendChild(div.cloneNode(true));
         }
-
         if (m.timestamp && isOlderThanOneDay(m.timestamp)) {
           olderDiv.appendChild(div);
         }
