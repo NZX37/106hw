@@ -175,10 +175,6 @@
         div.className = 'message';
         div.style.backgroundColor = getSubjectColor(subject);
 
-        // Show only due date, assignment, and subject
-        const dueDivSpan = document.createElement('span');
-        dueDivSpan.className = "due-date";
-        dueDivSpan.textContent = dueDate;
 
         const assignmentSpan = document.createElement('span');
         assignmentSpan.textContent = assignment;
