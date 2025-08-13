@@ -166,7 +166,7 @@
 
       messages.reverse().forEach(m => {
         if (!m.message) return;
-        const dueDate = m.dueDate || m.duedate || '';
+        const dueDate = m.dueDate || '';
         const subject = m.subject || '';
         const assignment = m.message || '';
 
@@ -175,7 +175,10 @@
         div.className = 'message';
         div.style.backgroundColor = getSubjectColor(subject);
 
-
+        const dueDivSpan = document.createElement('span');
+        dueDivSpan.className = "due-date";
+        dueDivSpan.textContent = dueDate;
+        
         const assignmentSpan = document.createElement('span');
         assignmentSpan.textContent = assignment;
 
