@@ -58,7 +58,7 @@
       <option value="Third Lang">Third Lang</option>
     </select>
     <input id="dueDate" type="date" required />
-    <button onclick="submitMsg()">Submit</button>
+    <button onclick="submitMsg()" onclick="changeButton()">Submit</button>
     <h3 class="section-title">Due Homework</h3>
     <div id="due"></div>
     <h3 class="section-title">Past Due Homework</h3>
@@ -197,10 +197,15 @@
         }
         if (m.timestamp && isOlderThanOneDay(m.timestamp)) {
           olderDiv.appendChild(div);
+    }
         }
       });
     }
-
+    function changeButton() {
+      const button = document.getElementById('myButton');
+      button.style.backgroundColor = "#002A82";
+      button.textContent = 'loading...';
+    }
     loadMessages();
   </script>
 </body>
